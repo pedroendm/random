@@ -18,14 +18,20 @@ def is_point_in_polygon(p, q, plot=False):
     # Plot
     if plot==True:
         xs, ys = zip(*(p + [p[0]]))
-        plt.plot(xs, ys, color="blue")
-        plt.plot(q[0], q[1], marker='o', markersize=3, color="red")
+        plt.plot(xs, ys, color="black")
+        for i in range(len(p)):
+            plt.annotate('p' + str(i), (xs[i], ys[i]), color='red')
+        plt.plot(q[0], q[1], marker='o', markersize=3, color="blue")
+        plt.annotate('q', (q[0], q[1]), color='blue')
         plt.show()
 
     # Get the tracks. There are n-2 tracks, where n is the number of vertices in the polygon.
     tracks = construct_tracks(p) # The tracks are already in counterclockwise order (CCW).
 
     # Find the track of the point q, using binary search.
+    # Special case: when point is within the boundary of (p[len(p)-1], p[0], p[1])
+    if turn (p[0], p[1], q) == 0 or turn (p[0], p[len(p)-1], q) == 0:
+        return 0
     track = find_point_track(tracks, q)
 
     # Check whether the points lies inside of the track
@@ -35,7 +41,7 @@ def construct_tracks(p):
     a, b = itertools.tee(p[1:])
     next(b, None)
     pairwise = list(zip(a, b)) # pairwise = (p1,p2), (p2,p3), (p3, p4), ...
-    return [(p[0], x, y) for x, y in pairwise] # (p0, p1,p2), (p0, p2,p3), (p0, p3, p4), ...
+    return [(p[0], x, y) for x, y in pairwise] # (p0, p1, p2), (p0, p2, p3), (p0, p3, p4), ...
 
 def turn(p1, p2, p3):
     """
@@ -72,4 +78,4 @@ def is_point_in_track(track, q):
 
 if __name__ == "__main__":
     polygon = [(6,1), (9,3), (11,6), (7,7), (4,7), (2,5)]
-    print(is_point_in_polygon(polygon, (6,7), True))
+    print(is_point_in_polygon(polygon, (9,3), True))
