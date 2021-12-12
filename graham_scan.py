@@ -6,9 +6,6 @@ class Stack:
         self.elems = [None] * capacity
         self.i = -1
 
-    def is_empty(self):
-        return len(self.elems) == 0
-
     def push(self, x):
         self.i += 1
         self.elems[self.i] = x
@@ -24,38 +21,45 @@ class Stack:
         return self.elems[self.i-1]
 
     def to_list(self):
-        return self.elems[0:self.i]
+        return self.elems[0:self.i+1]
 
 def graham_scan(points, plot=False):
-    points.append(points[0])
+    """
+     Let points = {p1, p2, p3, . . . , pn} be a set of n points in the plane. Assume that p1 is the point with the
+     smallest y-value, points is sorted in strictly decreasing order of polar angle w.r.t. p1 (there are no ties), and we
+     want to report the vertices of the convex hull in clockwise order (CW), starting from p1.
 
+     Time complexity: Theta(n).
+
+     :param points: the set of n points in the plane  :: [(Int, Int)]
+     :param plot: plot the polygon and the point (requires that matplolib is installed) :: Bool (false, by default)
+     :return: a stack containing, bottom to top, the convex hull of the points in CW order
+    """
     s = Stack(capacity = len(points))
     s.push(points[0])
     s.push(points[1])
     s.push(points[2])
 
-    for i in range(3, len(points)):
-        top, previous_top = s.top(), s.previous_top()
-        while turn(previous_top, top, points[i]) != -1:
+    for p_i in points[3:]:
+        while turn(s.previous_top(), s.top(), p_i) != -1:
             s.pop()
-            top, previous_top = s.top(), s.previous_top()
-        s.push(points[i])
-
-    print(s.to_list())
+        s.push(p_i)
 
     # Plot
     if plot==True:
         xs, ys = zip(*points)
         plt.scatter(xs, ys, color="black")
-        xs, ys = zip(*(s.to_list() + [s.to_list()[0]]))
+        xs, ys = zip(*(s.to_list() + [points[0]]))
         plt.plot(xs, ys, color="red")
         plt.show()
 
+    return s
+
 def turn(p1, p2, p3):
     """
-    0 if points are colinear
-    1 if points define a left-turn
-    -1 if points define a right-turn
+    0 if the points are colinear
+    1 if the points define a left-turn
+    -1 if the points define a right-turn
     """
     # Compute the z-coordinate of the vectorial product p1p2 x p2p3
     z = (p2[0] - p1[0]) * (p3[1] - p1[1]) - (p2[1] - p1[1]) * (p3[0]- p1[0])
@@ -63,4 +67,4 @@ def turn(p1, p2, p3):
 
 if __name__ == "__main__":
     points = [(6,1), (2,5), (4,4), (4,7), (6, 5), (7,7), (9, 5), (11,6), (9,3), (8,1)]
-    graham_scan(points, True)
+    print(graham_scan(points, True).to_list())
